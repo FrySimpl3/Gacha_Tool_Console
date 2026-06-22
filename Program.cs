@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Terminal.Gui;
 using App = Terminal.Gui.Application;
@@ -13,6 +15,11 @@ namespace GameToolClaudeStyle
 
         static void Main(string[] args)
         {
+            bool ExitSDLL = System.IO.Directory.Exists("Dlls");
+            if (!ExitSDLL) {
+                System.IO.Directory.CreateDirectory("Dlls");
+            }
+
             Console.InputEncoding = System.Text.Encoding.UTF8;
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -100,7 +107,16 @@ namespace GameToolClaudeStyle
             var viewLauncher = new View() { Width = Dim.Fill(), Height = Dim.Fill(), ColorScheme = darkTheme };
             viewLauncher.Add(new Label("Tải xuống Launcher tổng hợp để cài đặt tự động các game.") { X = 2, Y = 3 });
             var btnDlLauncher = new Button(" ► Bắt đầu tải Launcher ") { X = 2, Y = 5, ColorScheme = darkTheme };
-            btnDlLauncher.Clicked += () => MessageBox.Query("Tải tệp", "Đang kết nối CDN và tải setup_launcher.exe...", "OK");
+            btnDlLauncher.Clicked += async () => {
+                string url = "https://github.com/FrySimpl3/Gacha_Tool_Console/releases/download/Gacha/GachaCity.exe";
+
+                int result = MessageBox.Query("Xác nhận", "Bạn có muốn tải GachaCity.exe không?", "Có", "Hủy");
+                if (result == 0)
+                {
+                    await FileDownloader.DownloadWithProgressAsync(url, "GachaCity.exe",true);
+                }
+                //Process.Start("GachaCity.exe");
+            };
             viewLauncher.Add(btnDlLauncher);
 
             // --- View 2: Fix lỗi game ---
@@ -108,10 +124,31 @@ namespace GameToolClaudeStyle
             var btnFixSocial = new Button(" ► Fix Social ") { X = 2, Y = 4, Width = 22, ColorScheme = darkTheme };
             var btnDlDriver = new Button(" ► Tải Driver ") { X = 2, Y = 6, Width = 22, ColorScheme = darkTheme };
             var btnCloseGacha = new Button(" ► Đóng Gacha ") { X = 2, Y = 8, Width = 22, ColorScheme = darkTheme };
-
-            btnFixSocial.Clicked += () => MessageBox.Query("Sửa lỗi", "Đã dọn dẹp cache DNS và sửa kẹt Rockstar Social Club!", "OK");
-            btnDlDriver.Clicked += () => MessageBox.Query("Driver", "Đã mở trình duyệt tải Driver đồ họa thích hợp!", "OK");
-            btnCloseGacha.Clicked += () => MessageBox.Query("Tiến trình", "Đã buộc đóng hoàn toàn các game Gacha chạy ngầm bị kẹt!", "OK");
+            btnFixSocial.Clicked += async () => {
+                int result = MessageBox.Query("Xác nhận", "Bạn có muốn tải File không?", "Có", "Hủy");
+                if (result == 0)
+                {
+                    Process.Start("explorer.exe", "Dlls");
+                    await FileDownloader.DownloadWithProgressAsync("https://github.com/FrySimpl3/Gacha_Tool_Console/releases/download/V1.0.1/bink2w64.dll", "Dlls/bink2w64.dll");
+                    await FileDownloader.DownloadWithProgressAsync("https://github.com/FrySimpl3/Gacha_Tool_Console/releases/download/V1.0.1/vcruntime140d.dll", "Dlls/vcruntime140d.dll");
+                    await FileDownloader.DownloadWithProgressAsync("https://github.com/FrySimpl3/Gacha_Tool_Console/releases/download/V1.0.1/orig_socialclub.dll", "Dlls/orig_socialclub.dll");
+                    await FileDownloader.DownloadWithProgressAsync("https://github.com/FrySimpl3/Gacha_Tool_Console/releases/download/V1.0.1/launc.dll", "Dlls/launc.dll");
+                }
+            };
+            btnDlDriver.Clicked += async () => {
+                int result = MessageBox.Query("Xác nhận", "Bạn có muốn tải File không?", "Có", "Hủy");
+                if (result == 0)
+                {
+                    await FileDownloader.DownloadWithProgressAsync("https://aka.ms/vc14/vc_redist.x64.exe", "vc_redist.x64.exe",true);
+                }
+            };
+            btnCloseGacha.Clicked += async () => {
+                int result = MessageBox.Query("Xác nhận", "Bạn có muốn tải File không?", "Có", "Hủy");
+                if (result == 0)
+                {
+                    ProcessManager.CloseGachaCity();
+                }
+            };
             viewFixLoi.Add(btnFixSocial, btnDlDriver, btnCloseGacha);
 
             // --- View 3: Phần mềm ---

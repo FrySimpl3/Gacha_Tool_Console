@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,7 +17,8 @@ namespace GameToolClaudeStyle
         /// </summary>
         /// <param name="url">Đường dẫn tải file</param>
         /// <param name="destinationPath">Tên file hoặc đường dẫn lưu file</param>
-        public static async Task DownloadWithProgressAsync(string url, string destinationPath)
+        /// <param name="openAfterDownload">Tự động mở file sau khi tải xong nếu truyền true</param>
+        public static async Task DownloadWithProgressAsync(string url, string destinationPath, bool openAfterDownload = false)
         {
             // 1. Khởi tạo giao diện hiển thị tiến trình
             var progressDialog = new Dialog("Đang tải xuống...", 55, 7);
@@ -27,6 +29,8 @@ namespace GameToolClaudeStyle
 
             // Chạy dialog đè lên giao diện hiện tại
             App.MainLoop.Invoke(() => { App.Run(progressDialog); });
+
+            bool isSuccess = false;
 
             try
             {
@@ -61,15 +65,33 @@ namespace GameToolClaudeStyle
                     }
                 }
 
+                isSuccess = true;
                 // Đóng Progress Dialog khi hoàn thành
                 App.MainLoop.Invoke(() => { progressDialog.Running = false; });
-                MessageBox.Query("Thành công", $"Đã tải xong file {destinationPath}!", "OK");
             }
             catch (Exception ex)
             {
                 // Đóng Progress Dialog nếu có lỗi xảy ra
                 App.MainLoop.Invoke(() => { progressDialog.Running = false; });
                 MessageBox.Query("Lỗi tải file", $"Không thể tải file. Chi tiết:\n{ex.Message}", "OK");
+            }
+
+            // 3. Xử lý mở file sau khi Dialog tiến trình đã đóng hoàn toàn
+            if (isSuccess && openAfterDownload)
+            {
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = destinationPath,
+                        UseShellExecute = true // Bắt buộc phải là true để chạy file bằng ứng dụng mặc định của OS
+                    };
+                    Process.Start(psi);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Query("Lỗi mở file", $"Không thể mở file tự động. Chi tiết:\n{ex.Message}", "OK");
+                }
             }
         }
     }
