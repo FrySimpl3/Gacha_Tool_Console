@@ -165,7 +165,13 @@ namespace GameToolClaudeStyle
             var btnSteam = new Button(" ► Login Steam ") { X = 2, Y = 4, Width = 22, ColorScheme = darkTheme };
             var btnCmd = new Button(" ► Download CMD ") { X = 2, Y = 6, Width = 22, ColorScheme = darkTheme };
 
-            btnSteam.Clicked += () => MessageBox.Query("Steam", "Đang mở giao diện đăng nhập Steam...", "OK");
+            btnSteam.Clicked += async () => {
+                int result = MessageBox.Query("Xác nhận", "Bạn có muốn Login Steam không?", "Có", "Hủy");
+                if (result == 0)
+                {
+                    SteamProcessController.LoginToSteamApp("", "");
+                }
+            };
             btnCmd.Clicked += () => MessageBox.Query("SteamCMD", "Đang khởi động tiến trình tải gói SteamCMD chuyên dụng...", "OK");
             viewTaiGame.Add(btnSteam, btnCmd);
 
